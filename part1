@@ -1,0 +1,117 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+
+using namespace std;
+
+class person{
+    public:
+    string name;
+    int health;
+    
+    /*person(string a, int b){
+        name = a;
+        health = b;
+    }*/
+    
+    bool isAlive() const {
+        if( health > 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    string getName() const {
+        return name;
+    }
+
+    int getHealth() const {
+        return health;
+    }
+
+    void takeDamage(int damage) {
+        health = health - damage;
+        if (health < 0){
+            health = 0;
+        }
+    }
+    virtual void attack(person& a) = 0;
+   // virtual void heal(person& a) = 0;
+    
+};
+
+class player : public person{
+    public: 
+    int level;
+    
+    player(string name, int health, int level){
+        this -> name = name;
+        this -> health = health;
+        this -> level = level;
+    }
+    void attack(person& a) override {
+        int num = rand()%3+1;
+        int damage = rand() % 10 + 5*level;
+        if(num == 1){
+            a.takeDamage(damage*2);
+            cout<<name<<" dealt critical damage!\n"<<a.getName()<<" loses "<<damage*2<<" health"<<endl;
+        }
+        else if(num ==2){
+            cout<<a.getName()<<" blocked the attack"<<endl;
+        }
+        else if(num == 3){
+            a.takeDamage(damage);
+            cout<<name<<" dealt damage!\n"<<a.getName()<<" loses "<<damage<<" health"<<endl;
+        }
+    }
+};
+
+class enemy : public person{
+    public: 
+    int level;
+    
+    enemy(string name, int health, int level){
+        this -> name = name;
+        this -> health = health;
+        this -> level = level;
+    }
+    void attack(person& a) override {
+        int num = rand()%3+1;
+        int damage = rand() % 10 + 5*level;
+        if(num == 1){
+            a.takeDamage(damage*2);
+            cout<<name<<" dealt critical damage!\n"<<a.getName()<<" loses "<<damage*2<<" health"<<endl;
+        }
+        else if(num ==2){
+            cout<<a.getName()<<" blocked the attack"<<endl;
+        }
+        else if(num == 3){
+            a.takeDamage(damage);
+            cout<<name<<" dealt damage!\n"<<a.getName()<<" loses "<<damage<<" health"<<endl;
+        }
+    }
+};
+
+int main(){
+    player player1("Nazaar", 500, 3);
+    enemy enemy1("dracula",100,2);
+    
+     while (player1.isAlive() && enemy1.isAlive()) {
+        player1.attack(enemy1);
+        if (enemy1.isAlive()) {
+            enemy1.attack(player1);
+        }
+        cout << "Player Health: " << player1.getHealth() << ", Enemy Health: " << enemy1.getHealth() << "\n\n";
+    }
+    if (player1.isAlive()) {
+        cout << "Player wins!\n";
+    } else {
+        cout << "Enemy wins!\n";
+    }
+
+    return 0;
+}
+
+
+//yet to be edited, make features for healing and maybe escaping a battle leaving the choices to the user, add in various levels of enemies, maybe some unique abilities 
+// and if enough time storytelling for user. 
