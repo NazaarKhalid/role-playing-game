@@ -149,7 +149,7 @@ int main() {
                 player1.attack(enemy1);
                 break;
             case 2:
-                player1.heal(player1); // Heal the player
+                player1.heal(player1); 
                 break;
             default:
                 cout << "Invalid input" << endl;
@@ -191,7 +191,7 @@ int main() {
                 player1.attack(enemy2);
                 break;
             case 2:
-                player1.heal(player1); // Heal the player
+                player1.heal(player1); 
                 break;
             default:
                 cout << "Invalid input" << endl;
@@ -233,7 +233,7 @@ int main() {
                 player1.attack(enemy3);
                 break;
             case 2:
-                player1.heal(player1); // Heal the player
+                player1.heal(player1); 
                 break;
             default:
                 cout << "Invalid input" << endl;
