@@ -126,7 +126,7 @@ void levelup(person&a){
     }
 
 int main() {
-    srand(time(0)); // Seed the random number generator with the current time
+    srand(time(0)); 
 
     player player1("Nazaar", 500, 3);
     enemy enemy1("Ghoul", 70, 1);
