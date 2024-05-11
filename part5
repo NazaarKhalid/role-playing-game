@@ -1,0 +1,395 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <chrono>
+
+using namespace std;
+
+class person {
+public:
+    string name;
+    int health;
+    int experience;
+    int level;
+
+    bool isAlive() const {
+        return health > 0;
+    }
+
+    string getName() const {
+        return name;
+    }
+
+    int getHealth() const {
+        return health;
+    }
+
+    void takeDamage(int damage) {
+        health -= damage;
+        if (health < 0) {
+            health = 0;
+        }
+    }
+
+    void getHealed(int heal) {
+        health += heal;
+    }
+    
+    void gainXP(int xp){
+        experience += xp;
+    }
+
+    virtual void attack(person& a) = 0;
+    virtual void heal(person& a) = 0;
+    friend void levelup(person&a);
+};
+
+class player : public person {
+public:
+    player(string name, int health, int level) {
+        this->name = name;
+        this->health = health;
+        this->level = level;
+        this->experience = 0;
+    }
+
+    void attack(person& a) override {
+        int num = rand() % 3 + 1;
+        int damage = rand() % 10 + 5 * level;
+        if (num == 1) {
+            a.takeDamage(damage * 2);
+            cout << name << " dealt critical damage!\n" << a.getName() << " loses " << damage * 2 << " health" << endl;
+            experience = experience +50;
+        }
+        else if (num == 2) {
+            cout << a.getName() << " blocked the attack" << endl;
+        }
+        else if (num == 3) {
+            a.takeDamage(damage);
+            cout << name << " dealt damage!\n" << a.getName() << " loses " << damage << " health" << endl;
+            experience = experience +30;
+        }
+    }
+
+    void heal(person& a) override {
+        int heal = rand() % 10 + 5 * level;
+        if(health == 0){
+            health = 0;
+        }else{
+        getHealed(heal);
+        cout << name << " gained " << heal << " health" << endl;
+        }
+    }
+    
+    friend void levelup(person&a);
+};
+
+class enemy : public person {
+public:
+static int totalEnemies;
+    enemy(string name, int health, int level) {
+        this->name = name;
+        this->health = health;
+        this->level = level;
+        this->experience = 0;
+        totalEnemies++;
+    }
+    enemy(){}
+
+    void attack(person& a) override {
+        int num = rand() % 3 + 1;
+        int damage = rand() % 10 + 5 * level;
+        if (num == 1) {
+            a.takeDamage(damage * 2);
+            cout << name << " dealt critical damage!\n" << a.getName() << " loses " << damage * 2 << " health" << endl;
+             experience = experience +50;
+        }
+        else if (num == 2) {
+            cout << a.getName() << " blocked the attack" << endl;
+        }
+        else if (num == 3) {
+            a.takeDamage(damage);
+            cout << name << " dealt damage!\n" << a.getName() << " loses " << damage << " health" << endl;
+             experience = experience +30;
+        }
+    }
+
+    void heal(person& a) override {
+        int heal = rand() % 10 + 5 * level;
+        if(health == 0){
+            health = 0;
+        }else{
+        getHealed(heal);
+        cout << name << " gained " << heal << " health" << endl;
+        }
+    }
+    
+    friend void levelup(person&a);
+
+     enemy operator+(const enemy& other) const {
+        enemy result("Merged monstrosity", this->health + other.health, this->level + other.level);
+        return result;
+       
+    }
+};
+int enemy::totalEnemies = 0;
+void levelup(person&a){
+        if(a.experience >= 100){
+            a.level++;
+            cout<<a.name<<" leveled up!"<<endl;
+            int remaining_experience = a.experience - 100;
+            a.experience = remaining_experience;
+        }
+    }
+
+void displayText(const string& text, int delay) {
+    for (char c : text) {
+        cout << c;
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(delay));
+    }
+}
+
+int main() {
+    srand(time(0)); 
+
+    player player1("Nazaar", 500, 3);
+    enemy enemy1("Ghoul", 10, 1);
+    enemy enemy2("Cursed demon", 400, 5);
+    enemy enemy3("The undoing", 1000, 7);
+    enemy enemy4 = enemy1 + enemy2 + enemy3;
+    enemy::totalEnemies--;
+    int choice1, choice2, defeated_enemies = 0;
+    bool validInput = false;
+    string story1 ="Consumed by madness and the bitter sting of defeat, the Undoing merges with the Ghoul and the Cursed Demon, birthing an abomination—a wretched entity that defies existence itself. Only your valor can bring an end to this twisted aberration.\n";
+    string story2 = "From the depths below, a shadowy figure emerges, tainted and vile—a Ghoul, a harbinger of terror plaguing the nearby village. Stem the tide of its dread before its malevolence spreads to consume the world.\n";
+    string story3 = "A violent eruption rends the earth, spewing forth molten fury. An ancient demon, damned to eternal fire, ascends from infernal depths. The prophecy speaks of a valiant warrior destined to quell this demon before its flames engulf and devour the realm in chaos.\n";
+    string story4 = "The Undoing, a force of nature, a judge of humanity's fate. Humanity, bereft of grace, stands condemned in its eyes. The Undoing, harbinger of annihilation, deems mankind unworthy of life. Only your triumph can grant humanity another chance at redemption.\n";
+
+    
+do{
+    cout<<"---------------"<<endl;
+    cout << "Total number of enemies: " << enemy::totalEnemies << endl;
+    cout<<"Enemies defeated: "<< defeated_enemies<<endl;
+       validInput = false; 
+
+   
+while (!validInput) {
+    try {
+        cout << "Who do you wish to fight? \n1 for ghoul(level 1) \n2 for Cursed demon(level 5) \n3 for the undoing (level 10)" << endl;
+        cin >> choice2;
+        if (choice2 < 1 || choice2 > 3) {
+            throw std::invalid_argument("Invalid input");
+        }else{
+        validInput = true;
+        }
+    } catch (const std::invalid_argument& e) {
+        cout << e.what() << endl;
+        cout<<"Enter a valid input please."<<endl;
+    }
+}
+    
+    switch (choice2) {
+        case 1: 
+        if(enemy1.isAlive() == false)
+        cout<<"You already beat this battle."<<endl;
+        else{
+            displayText(story2, 100);
+        while (player1.isAlive() && enemy1.isAlive()) {
+       do{ cout << "Enter your choice: (1 for attack, 2 for heal)" << endl;
+        cin >> choice1;
+           system("cls");
+       }while(choice1 < 1 ||choice1 > 2);
+
+        switch (choice1) {
+            case 1:
+                player1.attack(enemy1);
+                break;
+            case 2:
+                player1.heal(player1); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+        int choice2 = rand() % 2 + 1;
+
+        switch (choice2) {
+            case 1:
+                enemy1.attack(player1);
+                break;
+            case 2:
+                enemy1.heal(enemy1); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+    levelup(player1);
+    levelup(enemy1);
+        cout << "Player Health: " << player1.getHealth() << ", Enemy Health: " << enemy1.getHealth() << endl;
+        cout << "Player level: " << player1.level << ", Enemy level: " << enemy1.level << endl;
+        cout << "Player experience: " << player1.experience << ", Enemy experience: " << enemy1.experience << endl;
+    }
+
+    if (player1.isAlive()) {
+        cout << player1.name<<" wins!\n";
+        defeated_enemies++;
+    } else {
+        cout << enemy1.name<<" wins!\n";
+    }
+        }
+            break;
+    
+        case 2:
+         if(enemy2.isAlive() == false)
+        cout<<"You already beat this battle."<<endl;
+        else{
+            displayText(story3, 100);
+        while (player1.isAlive() && enemy2.isAlive()) {
+       do{ cout << "Enter your choice: (1 for attack, 2 for heal)" << endl;
+        cin >> choice1;}while(choice1 < 1 ||choice1 > 2);
+
+        switch (choice1) {
+            case 1:
+                player1.attack(enemy2);
+                break;
+            case 2:
+                player1.heal(player1); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+        int choice2 = rand() % 2 + 1;
+
+        switch (choice2) {
+            case 1:
+                enemy2.attack(player1);
+                break;
+            case 2:
+                enemy2.heal(enemy2); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+    levelup(player1);
+    levelup(enemy2);
+        cout << "Player Health: " << player1.getHealth() << ", Enemy Health: " << enemy2.getHealth() << endl;
+        cout << "Player level: " << player1.level << ", Enemy level: " << enemy2.level << endl;
+        cout << "Player experience: " << player1.experience << ", Enemy experience: " << enemy2.experience << endl;
+    }
+
+    if (player1.isAlive()) {
+        cout << player1.name<<" wins!\n";
+        defeated_enemies++;
+    } else {
+        cout << enemy2.name<<" wins!\n";
+    }
+        }
+            break;
+        
+        case 3:
+         if(enemy3.isAlive() == false)
+        cout<<"You already beat this battle."<<endl;
+        else{
+            displayText(story4, 100);
+        while (player1.isAlive() && enemy3.isAlive()) {
+       do{ cout << "Enter your choice: (1 for attack, 2 for heal)" << endl;
+        cin >> choice1;}while(choice1 < 1 ||choice1 > 2);
+
+        switch (choice1) {
+            case 1:
+                player1.attack(enemy3);
+                break;
+            case 2:
+                player1.heal(player1); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+        int choice2 = rand() % 2 + 1;
+
+        switch (choice2) {
+            case 1:
+                enemy3.attack(player1);
+                break;
+            case 2:
+                enemy3.heal(enemy3); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+    levelup(player1);
+    levelup(enemy3);
+        cout << "Player Health: " << player1.getHealth() << ", Enemy Health: " << enemy3.getHealth() << endl;
+        cout << "Player level: " << player1.level << ", Enemy level: " << enemy3.level << endl;
+        cout << "Player experience: " << player1.experience << ", Enemy experience: " << enemy3.experience << endl;
+    }
+
+    if (player1.isAlive()) {
+        cout << player1.name<<" wins!\n";
+        defeated_enemies++;
+    } else {
+        cout << enemy3.name<<" wins!\n";
+    }
+        }
+   
+            break;
+            
+        default:
+        cout<<"Invalid option;"<<endl;
+    }
+    
+   
+}while(enemy3.isAlive());
+ displayText(story1, 100);
+        while (player1.isAlive() && enemy4.isAlive()) {
+       do{ cout << "Enter your choice: (1 for attack, 2 for heal)" << endl;
+        cin >> choice1;}while(choice1 < 1 ||choice1 > 2);
+
+        switch (choice1) {
+            case 1:
+                player1.attack(enemy4);
+                break;
+            case 2:
+                player1.heal(player1); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+        int choice2 = rand() % 2 + 1;
+
+        switch (choice2) {
+            case 1:
+                enemy4.attack(player1);
+                break;
+            case 2:
+                enemy4.heal(enemy4); 
+                break;
+            default:
+                cout << "Invalid input" << endl;
+        }
+
+    levelup(player1);
+    levelup(enemy4);
+        cout << player1.getName()<< " Health: " << player1.getHealth() << "," <<enemy4.getName()<<" Health: " << enemy4.getHealth() << endl;
+        cout << "Player level: " << player1.level << ", Enemy level: " << enemy4.level << endl;
+        cout << "Player experience: " << player1.experience << ", Enemy experience: " << enemy4.experience << endl;
+    }
+
+    if (player1.isAlive()) {
+        cout << player1.name<<" wins!\n";
+        defeated_enemies++;
+        
+    } else {
+        cout << enemy4.name<<" wins!\n";
+    }
+    return 0;
+}
